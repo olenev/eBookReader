@@ -20,6 +20,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".FolioCustomActivity"
+            android:label="@string/app_name"
+            android:theme="@style/FolioActivityDayTheme" />
+
+
     </application>
 
 </manifest>
