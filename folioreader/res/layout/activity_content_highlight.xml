@@ -7,7 +7,7 @@
     tools:context="com.folioreader.ui.activity.ContentHighlightActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbarReaderFolio"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_margin="0dp"
@@ -77,5 +77,5 @@
         android:id="@+id/parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar" />
+        android:layout_below="@id/toolbarReaderFolio" />
 </RelativeLayout>

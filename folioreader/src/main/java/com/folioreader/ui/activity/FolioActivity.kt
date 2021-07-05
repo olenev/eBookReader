@@ -300,7 +300,7 @@ open class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaCont
     private fun initActionBar() {
 
         appBarLayout = findViewById(R.id.appBarLayout)
-        toolbar = findViewById(R.id.toolbar)
+        toolbar = findViewById(R.id.toolbarReaderFolio)
         setSupportActionBar(toolbar)
         actionBar = supportActionBar
 

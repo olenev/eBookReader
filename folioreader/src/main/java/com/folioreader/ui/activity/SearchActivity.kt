@@ -70,9 +70,9 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
             oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
         ) {
 
-            for (i in 0 until toolbar.childCount) {
+            for (i in 0 until toolbarReaderFolio.childCount) {
 
-                val view: View = toolbar.getChildAt(i)
+                val view: View = toolbarReaderFolio.getChildAt(i)
                 val contentDescription: String? = view.contentDescription as String?
                 if (TextUtils.isEmpty(contentDescription))
                     continue
@@ -86,7 +86,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
                         navigateBack()
                     }
 
-                    toolbar.removeOnLayoutChangeListener(this)
+                    toolbarReaderFolio.removeOnLayoutChangeListener(this)
                     return
                 }
             }
@@ -111,8 +111,8 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
     private fun init(config: Config) {
         Log.v(LOG_TAG, "-> init")
 
-        setSupportActionBar(toolbar)
-        toolbar.addOnLayoutChangeListener(toolbarOnLayoutChangeListener)
+        setSupportActionBar(toolbarReaderFolio)
+        toolbarReaderFolio.addOnLayoutChangeListener(toolbarOnLayoutChangeListener)
         actionBar = supportActionBar!!
         actionBar.setDisplayHomeAsUpEnabled(true)
         actionBar.setDisplayShowTitleEnabled(false)
@@ -120,7 +120,7 @@ class SearchActivity : AppCompatActivity(), OnItemClickListener {
         try {
             val fieldCollapseIcon: Field = Toolbar::class.java.getDeclaredField("mCollapseIcon")
             fieldCollapseIcon.isAccessible = true
-            val collapseIcon: Drawable = fieldCollapseIcon.get(toolbar) as Drawable
+            val collapseIcon: Drawable = fieldCollapseIcon.get(toolbarReaderFolio) as Drawable
             UiUtil.setColorIntToDrawable(config.themeColor, collapseIcon)
         } catch (e: Exception) {
             Log.e(LOG_TAG, "-> ", e)

@@ -149,7 +149,7 @@ public class DictionaryFragment extends DialogFragment
         UiUtil.setShapeColor(googleSearch, themeColor);
 
         if (config.isNightMode()) {
-            view.findViewById(R.id.toolbar).setBackgroundColor(Color.BLACK);
+            view.findViewById(R.id.toolbarReaderFolio).setBackgroundColor(Color.BLACK);
             view.findViewById(R.id.contentView).setBackgroundColor(Color.BLACK);
             dictionary.setBackgroundDrawable(UiUtil.createStateDrawable(themeColor, Color.BLACK));
             wikipedia.setBackgroundDrawable(UiUtil.createStateDrawable(themeColor, Color.BLACK));
