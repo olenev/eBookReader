@@ -6,6 +6,8 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.folioreader.ui.fragment.FolioPageFragment;
 import org.readium.r2.shared.Link;
 
@@ -34,6 +36,24 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
         this.mBookId = bookId;
         fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
     }
+
+
+//    public FolioPageFragmentAdapter(FragmentManager fragmentManager, List<Link> spineReferences,
+//                                    String epubFileName, String bookId, boolean isChildFragment) {
+//
+//        this.mSpineReferences = spineReferences;
+//        this.mEpubFileName = epubFileName;
+//        this.mBookId = bookId;
+//
+//        FragmentTransaction ft = fragmentManager.beginTransaction();
+//
+//        fragmentManager.beginTransaction();
+//        fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
+//        ft.commit();
+//    }
+
+
+
 
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {

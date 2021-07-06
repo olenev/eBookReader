@@ -43,4 +43,6 @@ public interface FolioActivityCallback {
     WeakReference<Object> getWindowsManager();
 
     String getStreamerUrl();
+//
+//    FolioActivityCallback folioActivityCallbackReference();
 }

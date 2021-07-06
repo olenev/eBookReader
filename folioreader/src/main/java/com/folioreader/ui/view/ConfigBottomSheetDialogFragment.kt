@@ -50,7 +50,9 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (activity is FolioActivity)
-            activityCallback = activity as FolioActivity
+            activityCallback = activity as FolioActivityCallback
+        else
+            activityCallback = parentFragment as FolioActivityCallback
 
         view.viewTreeObserver.addOnGlobalLayoutListener {
             val dialog = dialog as BottomSheetDialog

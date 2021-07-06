@@ -52,6 +52,7 @@ import org.readium.r2.shared.Locations
 import java.util.*
 import java.util.regex.Pattern
 
+
 /**
  * Created by mahavir on 4/2/16.
  */
@@ -139,6 +140,9 @@ class FolioPageFragment : Fragment(),
 
         if (activity is FolioActivityCallback)
             mActivityCallback = activity as FolioActivityCallback?
+        else{
+            mActivityCallback = parentFragment as FolioActivityCallback?
+        }
 
         EventBus.getDefault().register(this)
 
@@ -359,6 +363,9 @@ class FolioPageFragment : Fragment(),
 
         if (activity is FolioActivityCallback)
             mWebview!!.setFolioActivityCallback((activity as FolioActivityCallback?)!!)
+        else{
+            mWebview!!.setFolioActivityCallback((parentFragment as FolioActivityCallback?)!!)
+        }
 
         setupScrollBar()
         mWebview!!.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
