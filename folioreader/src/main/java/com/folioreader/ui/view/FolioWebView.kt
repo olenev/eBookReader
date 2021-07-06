@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
+import androidx.fragment.app.FragmentActivity
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.R
@@ -579,10 +580,11 @@ class FolioWebView : WebView {
         Log.v(LOG_TAG, "-> applyThemeColorToHandles")
 
         if (Build.VERSION.SDK_INT < 23) {
-            val folioActivityRef: WeakReference<FolioActivity> = folioActivityCallback.activity
-            val mWindowManagerField = ReflectionUtils.findField(FolioActivity::class.java, "mWindowManager")
-            mWindowManagerField.isAccessible = true
-            val mWindowManager = mWindowManagerField.get(folioActivityRef.get())
+//            val folioActivityRef: WeakReference<FolioActivity> = folioActivityCallback.activity
+//            val mWindowManagerField = ReflectionUtils.findField(FolioActivity::class.java, "mWindowManager")
+//            mWindowManagerField.isAccessible = true
+//            val mWindowManager = mWindowManagerField.get(folioActivityRef.get())
+            val mWindowManager = folioActivityCallback.windowsManager
 
             val windowManagerImplClass = Class.forName("android.view.WindowManagerImpl")
             val mGlobalField = ReflectionUtils.findField(windowManagerImplClass, "mGlobal")
@@ -607,10 +609,11 @@ class FolioWebView : WebView {
             }
 
         } else {
-            val folioActivityRef: WeakReference<FolioActivity> = folioActivityCallback.activity
-            val mWindowManagerField = ReflectionUtils.findField(FolioActivity::class.java, "mWindowManager")
-            mWindowManagerField.isAccessible = true
-            val mWindowManager = mWindowManagerField.get(folioActivityRef.get())
+//            val folioActivityRef: WeakReference<FolioActivity> = folioActivityCallback.activity
+//            val mWindowManagerField = ReflectionUtils.findField(FolioActivity::class.java, "mWindowManager")
+//            mWindowManagerField.isAccessible = true
+//            val mWindowManager = mWindowManagerField.get(folioActivityRef.get())
+            val mWindowManager = folioActivityCallback.windowsManager
 
             val windowManagerImplClass = Class.forName("android.view.WindowManagerImpl")
             val mGlobalField = ReflectionUtils.findField(windowManagerImplClass, "mGlobal")
@@ -636,7 +639,7 @@ class FolioWebView : WebView {
                 //val pathClassLoader = PathClassLoader("/system/app/Chrome/Chrome.apk", ClassLoader.getSystemClassLoader())
 
                 val pathClassLoader =
-                    PathClassLoader("/system/app/Chrome/Chrome.apk", folioActivityRef.get()?.classLoader)
+                    PathClassLoader("/system/app/Chrome/Chrome.apk",folioActivityCallback.activityClassLoader)
 
                 val popupTouchHandleDrawableClass = Class.forName(
                     "org.chromium.android_webview.PopupTouchHandleDrawable",

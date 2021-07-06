@@ -1,6 +1,9 @@
 package com.folioreader.ui.activity;
 
 import android.graphics.Rect;
+
+import androidx.fragment.app.FragmentActivity;
+
 import com.folioreader.Config;
 import com.folioreader.model.DisplayUnit;
 import com.folioreader.model.locators.ReadLocator;
@@ -33,7 +36,11 @@ public interface FolioActivityCallback {
 
     Rect getViewportRect(final DisplayUnit unit);
 
-    WeakReference<FolioActivity> getActivity();
+    WeakReference<FragmentActivity> getCurrentActivity();
+
+    ClassLoader getActivityClassLoader();
+
+    WeakReference<Object> getWindowsManager();
 
     String getStreamerUrl();
 }

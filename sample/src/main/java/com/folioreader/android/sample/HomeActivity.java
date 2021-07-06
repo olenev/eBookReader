@@ -15,20 +15,26 @@
  */
 package com.folioreader.android.sample;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folioreader.Config;
+import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.locators.ReadLocator;
 import com.folioreader.ui.activity.FolioActivity;
 import com.folioreader.ui.base.OnSaveHighlight;
+import com.folioreader.ui.fragment.FolioFragment;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadLocatorListener;
@@ -49,6 +55,8 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         setContentView(R.layout.activity_home);
 
         folioReader = FolioReader.get()
@@ -87,7 +95,10 @@ public class HomeActivity extends AppCompatActivity
 //                folioReader.setConfig(config, true)
 //                        .openBook("file:///android_asset/TheSilverChair.epub");
 
-                folioReader.openBook("file:///android_asset/TheSilverChair.epub", new FolioCustomActivity());
+
+                Intent intent = new Intent(HomeActivity.this, FolioCustomActivity.class);
+                startActivity(intent);
+
             }
         });
     }

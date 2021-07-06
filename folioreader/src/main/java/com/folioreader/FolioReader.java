@@ -6,9 +6,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.Parcelable;
+
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
 import com.folioreader.model.HighLight;
 import com.folioreader.model.HighlightImpl;
 import com.folioreader.model.locators.ReadLocator;
@@ -18,8 +22,10 @@ import com.folioreader.network.R2StreamerApi;
 import com.folioreader.ui.activity.FolioActivity;
 import com.folioreader.ui.base.OnSaveHighlight;
 import com.folioreader.ui.base.SaveReceivedHighlightTask;
+import com.folioreader.ui.fragment.FolioFragment;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadLocatorListener;
+
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -136,13 +142,6 @@ public class FolioReader {
         return singleton;
     }
 
-    public FolioReader openBook(String assetOrSdcardPath, Activity activity) {
-        Intent intent = getIntentCustomActivityFromUrl(assetOrSdcardPath, 0, activity);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
-        return singleton;
-    }
-
     public FolioReader openBook(int rawId) {
         Intent intent = getIntentFromUrl(null, rawId);
         context.startActivity(intent);
@@ -189,35 +188,32 @@ public class FolioReader {
         return intent;
     }
 
-    private Intent getIntentCustomActivityFromUrl(String assetOrSdcardPath, int rawId, Activity activity) {
+    public FolioFragment createBookFragment(String assetOrSdcardPath, int rawId) {
 
-        Intent intent = new Intent(context, activity.getClass());
-//        Intent intent = new Intent(context, FolioActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Config.INTENT_CONFIG, config);
-        intent.putExtra(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
-        intent.putExtra(EXTRA_PORT_NUMBER, portNumber);
-        intent.putExtra(FolioActivity.EXTRA_READ_LOCATOR, (Parcelable) readLocator);
+        FolioFragment fragment = new FolioFragment();
+
+        Bundle bundle = new Bundle();
+
+        bundle.putInt(EXTRA_PORT_NUMBER, portNumber);
+        bundle.putParcelable(Config.INTENT_CONFIG, config);
+        bundle.putBoolean(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
+        bundle.putParcelable(FolioActivity.EXTRA_READ_LOCATOR, (Parcelable) readLocator);
 
         if (rawId != 0) {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, rawId);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.RAW);
+            bundle.putInt(FolioActivity.INTENT_EPUB_SOURCE_PATH, rawId);
+            bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.RAW);
         } else if (assetOrSdcardPath.contains(Constants.ASSET)) {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.ASSETS);
+            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
+            bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.ASSETS);
         } else {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.SD_CARD);
+            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
+            bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.SD_CARD);
         }
 
-        return intent;
+        fragment.setArguments(bundle);
+
+        return fragment;
     }
-
-
-
 
     /**
      * Pass your configuration and choose to override it every time or just for first execution.
