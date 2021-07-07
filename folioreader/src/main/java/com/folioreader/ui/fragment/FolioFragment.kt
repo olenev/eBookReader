@@ -297,13 +297,14 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         toolbar = view?.findViewById(R.id.toolbarReaderFolio)
         createOptionsMenu()
         val config = AppUtil.getSavedConfig((activity as AppCompatActivity).applicationContext)!!
-        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_drawer)
-        UiUtil.setColorIntToDrawable(config.themeColor, drawable!!)
-        toolbar!!.navigationIcon = drawable
-        toolbar!!.setNavigationOnClickListener(View.OnClickListener {
-            Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
-            startContentHighlightActivity()
-        })
+
+//        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_drawer)
+//        UiUtil.setColorIntToDrawable(config.themeColor, drawable!!)
+//        toolbar!!.navigationIcon = drawable
+//        toolbar!!.setNavigationOnClickListener(View.OnClickListener {
+//            Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
+//            startContentHighlightActivity()
+//        })
 
         if (config.isNightMode) {
             setNightMode()
@@ -374,6 +375,10 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
             config.themeColor,
             toolbar?.menu?.findItem(R.id.itemConfig)?.icon
         )
+        UiUtil.setColorIntToDrawable(
+            config.themeColor,
+            toolbar?.menu?.findItem(R.id.itemDrawer)?.icon
+        )
         UiUtil.setColorIntToDrawable(config.themeColor, toolbar?.menu?.findItem(R.id.itemTts)?.icon)
 
         if (!config.isShowTts)
@@ -382,7 +387,12 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         toolbar?.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener { item ->
             val itemId = item.itemId
 
-            if (itemId == android.R.id.home) {
+//            if (itemId == android.R.id.home) {
+//                Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
+//                startContentHighlightActivity()
+//                true
+
+            if (itemId == R.id.itemDrawer) {
                 Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
                 startContentHighlightActivity()
                 true
