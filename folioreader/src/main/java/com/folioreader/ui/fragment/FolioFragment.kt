@@ -732,10 +732,12 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
     }
 
     override fun onSystemUiVisibilityChange(visibility: Int) {
-        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
 
-        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
-        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
+//        todo Скрывать статус бар
+//        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
+//
+//        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
+//        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
 
 //        todo Скрывать тул бар
 //        if (toolbar != null) {
