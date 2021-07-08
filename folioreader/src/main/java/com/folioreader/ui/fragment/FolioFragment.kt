@@ -598,8 +598,8 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         (activity as AppCompatActivity).window.decorView.setOnSystemUiVisibilityChangeListener(this)
 
         // Deliberately Hidden and shown to make activity contents lay out behind SystemUI
-        hideSystemUI()
-        showSystemUI()
+//        hideSystemUI()
+//        showSystemUI()
 
         distractionFreeMode = savedInstanceState != null && savedInstanceState.getBoolean(
             BUNDLE_DISTRACTION_FREE_MODE
@@ -752,9 +752,9 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
     override fun toggleSystemUI() {
 
         if (distractionFreeMode) {
-            showSystemUI()
+//            showSystemUI()
         } else {
-            hideSystemUI()
+//            hideSystemUI()
         }
     }
 
