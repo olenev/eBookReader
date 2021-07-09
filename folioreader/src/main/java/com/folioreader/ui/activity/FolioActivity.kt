@@ -76,7 +76,7 @@ import org.readium.r2.streamer.server.Server
 import org.springframework.util.ReflectionUtils
 import java.lang.ref.WeakReference
 
-open class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
+class FolioActivity : AppCompatActivity(), FolioActivityCallback, MediaControllerCallback,
     View.OnSystemUiVisibilityChangeListener {
 
     private var bookFileName: String? = null

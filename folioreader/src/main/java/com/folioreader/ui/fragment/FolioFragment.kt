@@ -288,7 +288,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.folio_activity, container, false)
+        return inflater.inflate(R.layout.fragment_folio, container, false)
     }
 
     private fun initActionBar() {
@@ -364,7 +364,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
 
     fun createOptionsMenu() {
 
-        toolbar?.inflateMenu(R.menu.menu_main)
+        toolbar?.inflateMenu(R.menu.menu_main_fragment)
 
         val config = AppUtil.getSavedConfig((activity as AppCompatActivity).applicationContext)!!
         UiUtil.setColorIntToDrawable(
