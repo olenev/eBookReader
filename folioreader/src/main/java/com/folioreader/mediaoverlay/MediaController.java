@@ -101,9 +101,11 @@ public class MediaController {
     }
 
     public void setTextToSpeech(final Context context) {
+        
         mTextToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
+                 if (mTextToSpeech != null) {
                 if (status != TextToSpeech.ERROR) {
                     mTextToSpeech.setLanguage(Locale.UK);
                     mTextToSpeech.setSpeechRate(0.70f);
@@ -123,6 +125,7 @@ public class MediaController {
                                 });
                             }
                         });
+                      }
             }
         });
     }
