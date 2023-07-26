@@ -1,3 +1,7 @@
+Implementation with ability to use Fragment of FolioReader
+https://github.com/FolioReader/FolioReader-Android
+
+-------------------------------------
 ![FolioReader logo](https://raw.githubusercontent.com/FolioReader/FolioReaderKit/assets/folioreader.png)
 
 [![Build Status](https://api.travis-ci.org/FolioReader/FolioReader-Android.svg?branch=master)](https://travis-ci.org/FolioReader/FolioReader-Android)
