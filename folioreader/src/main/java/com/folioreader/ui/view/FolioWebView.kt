@@ -11,8 +11,16 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.*
+import android.view.ActionMode
 import android.view.ActionMode.Callback
+import android.view.ContextThemeWrapper
+import android.view.GestureDetector
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
@@ -22,7 +30,6 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
-import androidx.fragment.app.FragmentActivity
 import com.folioreader.Config
 import com.folioreader.Constants
 import com.folioreader.R
@@ -30,7 +37,6 @@ import com.folioreader.model.DisplayUnit
 import com.folioreader.model.HighLight
 import com.folioreader.model.HighlightImpl.HighlightStyle
 import com.folioreader.model.sqlite.HighLightTable
-import com.folioreader.ui.activity.FolioActivity
 import com.folioreader.ui.activity.FolioActivityCallback
 import com.folioreader.ui.fragment.DictionaryFragment
 import com.folioreader.ui.fragment.FolioPageFragment
@@ -38,10 +44,17 @@ import com.folioreader.util.AppUtil
 import com.folioreader.util.HighlightUtil
 import com.folioreader.util.UiUtil
 import dalvik.system.PathClassLoader
-import kotlinx.android.synthetic.main.text_selection.view.*
+import kotlinx.android.synthetic.main.text_selection.view.blueHighlight
+import kotlinx.android.synthetic.main.text_selection.view.copySelection
+import kotlinx.android.synthetic.main.text_selection.view.defineSelection
+import kotlinx.android.synthetic.main.text_selection.view.deleteHighlight
+import kotlinx.android.synthetic.main.text_selection.view.greenHighlight
+import kotlinx.android.synthetic.main.text_selection.view.pinkHighlight
+import kotlinx.android.synthetic.main.text_selection.view.shareSelection
+import kotlinx.android.synthetic.main.text_selection.view.underlineHighlight
+import kotlinx.android.synthetic.main.text_selection.view.yellowHighlight
 import org.json.JSONObject
 import org.springframework.util.ReflectionUtils
-import java.lang.ref.WeakReference
 
 /**
  * @author by mahavir on 3/31/16.
@@ -157,13 +170,23 @@ class FolioWebView : WebView {
 
     private inner class HorizontalGestureListener : GestureDetector.SimpleOnGestureListener() {
 
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+        override fun onScroll(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
             //Log.d(LOG_TAG, "-> onScroll -> e1 = " + e1 + ", e2 = " + e2 + ", distanceX = " + distanceX + ", distanceY = " + distanceY);
             lastScrollType = LastScrollType.USER
             return false
         }
 
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
             //Log.d(LOG_TAG, "-> onFling -> e1 = " + e1 + ", e2 = " + e2 + ", velocityX = " + velocityX + ", velocityY = " + velocityY);
 
             if (!webViewPager.isScrolling) {
@@ -172,7 +195,7 @@ class FolioWebView : WebView {
                 //Log.d(LOG_TAG, "-> onFling -> completing scroll");
                 uiHandler.postDelayed({
                     // Delayed to avoid inconsistency of scrolling in WebView
-                    scrollTo(getScrollXPixelsForPage(webViewPager!!.currentItem), 0)
+                    scrollTo(getScrollXPixelsForPage(webViewPager.currentItem), 0)
                 }, 100)
             }
 
@@ -180,18 +203,18 @@ class FolioWebView : WebView {
             return true
         }
 
-        override fun onDown(event: MotionEvent?): Boolean {
+        override fun onDown(e: MotionEvent): Boolean {
             //Log.v(LOG_TAG, "-> onDown -> " + event.toString());
 
-            eventActionDown = MotionEvent.obtain(event)
-            super@FolioWebView.onTouchEvent(event)
+            eventActionDown = MotionEvent.obtain(e)
+            super@FolioWebView.onTouchEvent(e)
             return true
         }
     }
 
     @JavascriptInterface
     fun dismissPopupWindow(): Boolean {
-        Log.d(LOG_TAG, "-> dismissPopupWindow -> " + parentFragment.spineItem?.href)
+        Log.d(LOG_TAG, "-> dismissPopupWindow -> " + parentFragment.spineItem.href)
         val wasShowing = popupWindow.isShowing
         if (Looper.getMainLooper().thread == Thread.currentThread()) {
             popupWindow.dismiss()
@@ -199,7 +222,7 @@ class FolioWebView : WebView {
             uiHandler.post { popupWindow.dismiss() }
         }
         selectionRect = Rect()
-        uiHandler.removeCallbacks(isScrollingRunnable)
+        isScrollingRunnable?.let { uiHandler.removeCallbacks(it) }
         isScrollingCheckDuration = 0
         return wasShowing
     }
@@ -213,13 +236,23 @@ class FolioWebView : WebView {
 
     private inner class VerticalGestureListener : GestureDetector.SimpleOnGestureListener() {
 
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+        override fun onScroll(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
             //Log.v(LOG_TAG, "-> onScroll -> e1 = " + e1 + ", e2 = " + e2 + ", distanceX = " + distanceX + ", distanceY = " + distanceY);
             lastScrollType = LastScrollType.USER
             return false
         }
 
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
+        override fun onFling(
+            e1: MotionEvent,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
             //Log.v(LOG_TAG, "-> onFling -> e1 = " + e1 + ", e2 = " + e2 + ", velocityX = " + velocityX + ", velocityY = " + velocityY);
             lastScrollType = LastScrollType.USER
             return false
@@ -337,7 +370,12 @@ class FolioWebView : WebView {
         val bundle = Bundle()
         bundle.putString(Constants.SELECTED_WORD, selectedText?.trim())
         dictionaryFragment.arguments = bundle
-        dictionaryFragment.show(parentFragment.fragmentManager!!, DictionaryFragment::class.java.name)
+        parentFragment.fragmentManager?.let {
+            dictionaryFragment.show(
+                it,
+                DictionaryFragment::class.java.name
+            )
+        }
     }
 
     private fun onHighlightColorItemsClicked(style: HighlightStyle, isAlreadyCreated: Boolean) {
@@ -681,7 +719,7 @@ class FolioWebView : WebView {
             Log.i(LOG_TAG, "-> currentSelectionRect doesn't intersects viewportRect")
             uiHandler.post {
                 popupWindow.dismiss()
-                uiHandler.removeCallbacks(isScrollingRunnable)
+                isScrollingRunnable?.let { uiHandler.removeCallbacks(it) }
             }
             return
         }
@@ -773,7 +811,7 @@ class FolioWebView : WebView {
         oldScrollY = scrollY
 
         isScrollingRunnable = Runnable {
-            uiHandler.removeCallbacks(isScrollingRunnable)
+            isScrollingRunnable?.let { uiHandler.removeCallbacks(it) }
             val currentScrollX = scrollX
             val currentScrollY = scrollY
             val inTouchMode = lastTouchAction == MotionEvent.ACTION_DOWN ||
@@ -794,13 +832,21 @@ class FolioWebView : WebView {
                 oldScrollY = currentScrollY
                 isScrollingCheckDuration += IS_SCROLLING_CHECK_TIMER
                 if (isScrollingCheckDuration < IS_SCROLLING_CHECK_MAX_DURATION && !destroyed)
-                    uiHandler.postDelayed(isScrollingRunnable, IS_SCROLLING_CHECK_TIMER.toLong())
+                    isScrollingRunnable?.let {
+                        uiHandler.postDelayed(
+                            it,
+                            IS_SCROLLING_CHECK_TIMER.toLong()
+                        )
+                    }
             }
         }
 
-        uiHandler.removeCallbacks(isScrollingRunnable)
+        isScrollingRunnable?.let { uiHandler.removeCallbacks(it) }
         isScrollingCheckDuration = 0
-        if (!destroyed)
-            uiHandler.postDelayed(isScrollingRunnable, IS_SCROLLING_CHECK_TIMER.toLong())
+        if (!destroyed) {
+            isScrollingRunnable?.let {
+                uiHandler.postDelayed(it, IS_SCROLLING_CHECK_TIMER.toLong())
+            }
+        }
     }
 }

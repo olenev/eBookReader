@@ -1,16 +1,14 @@
 package com.folioreader;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Parcelable;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.RawRes;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.folioreader.model.HighLight;
@@ -136,82 +134,80 @@ public class FolioReader {
                 new IntentFilter(ACTION_FOLIOREADER_CLOSED));
     }
 
-    public FolioReader openBook(String assetOrSdcardPath) {
-        Intent intent = getIntentFromUrl(assetOrSdcardPath, 0);
+    public FolioReader openBook(String deviceStoragePath, boolean isInternalStorage) {
+        Intent intent = getIntentFromUrl(deviceStoragePath, 0, isInternalStorage);
         context.startActivity(intent);
         return singleton;
     }
 
-    public FolioReader openBook(int rawId) {
-        Intent intent = getIntentFromUrl(null, rawId);
+    public FolioReader openBook(String assetPath) {
+        Intent intent = getIntentFromUrl(assetPath, 0, true);
         context.startActivity(intent);
         return singleton;
     }
 
-    public FolioReader openBook(String assetOrSdcardPath, String bookId) {
-        Intent intent = getIntentFromUrl(assetOrSdcardPath, 0);
+    public FolioReader openBook(@RawRes int rawId) {
+        Intent intent = getIntentFromUrl(null, rawId, true);
+        context.startActivity(intent);
+        return singleton;
+    }
+
+    public FolioReader openBook(String assetPath, String bookId) {
+        Intent intent = getIntentFromUrl(assetPath, 0, true);
+        intent.putExtra(EXTRA_BOOK_ID, bookId);
+        context.startActivity(intent);
+        return singleton;
+    }
+
+    public FolioReader openBook(String deviceStoragePath, boolean isInternalStorage, String bookId) {
+        Intent intent = getIntentFromUrl(deviceStoragePath, 0, isInternalStorage);
         intent.putExtra(EXTRA_BOOK_ID, bookId);
         context.startActivity(intent);
         return singleton;
     }
 
     public FolioReader openBook(int rawId, String bookId) {
-        Intent intent = getIntentFromUrl(null, rawId);
+        Intent intent = getIntentFromUrl(null, rawId, true);
         intent.putExtra(EXTRA_BOOK_ID, bookId);
         context.startActivity(intent);
         return singleton;
     }
 
-    private Intent getIntentFromUrl(String assetOrSdcardPath, int rawId) {
-
-        Intent intent = new Intent(context, FolioActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(Config.INTENT_CONFIG, config);
-        intent.putExtra(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
-        intent.putExtra(EXTRA_PORT_NUMBER, portNumber);
-        intent.putExtra(FolioActivity.EXTRA_READ_LOCATOR, (Parcelable) readLocator);
-
-        if (rawId != 0) {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, rawId);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.RAW);
-        } else if (assetOrSdcardPath.contains(Constants.ASSET)) {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.ASSETS);
-        } else {
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
-            intent.putExtra(FolioActivity.INTENT_EPUB_SOURCE_TYPE,
-                    FolioActivity.EpubSourceType.SD_CARD);
-        }
-
-        return intent;
-    }
-
-    public FolioFragment createBookFragment(String assetOrSdcardPath, int rawId) {
-
-        FolioFragment fragment = new FolioFragment();
-
+    private Bundle getPreparedArguments(String path, int rawId, boolean isInternalStorage) {
         Bundle bundle = new Bundle();
-
+        bundle.putBoolean(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
         bundle.putInt(EXTRA_PORT_NUMBER, portNumber);
         bundle.putParcelable(Config.INTENT_CONFIG, config);
-        bundle.putBoolean(Config.EXTRA_OVERRIDE_CONFIG, overrideConfig);
-        bundle.putParcelable(FolioActivity.EXTRA_READ_LOCATOR, (Parcelable) readLocator);
+        bundle.putParcelable(FolioActivity.EXTRA_READ_LOCATOR, readLocator);
 
         if (rawId != 0) {
             bundle.putInt(FolioActivity.INTENT_EPUB_SOURCE_PATH, rawId);
             bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.RAW);
-        } else if (assetOrSdcardPath.contains(Constants.ASSET)) {
-            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
+        } else if (path.contains(Constants.ASSET)) {
+            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, path);
             bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.ASSETS);
         } else {
-            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, assetOrSdcardPath);
-            bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.SD_CARD);
+            bundle.putString(FolioActivity.INTENT_EPUB_SOURCE_PATH, path);
+            bundle.putSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType.DEVICE_STORAGE);
         }
 
-        fragment.setArguments(bundle);
+        bundle.putBoolean(FolioActivity.INTENT_EPUB_SOURCE_STORAGE_TYPE, isInternalStorage);
 
+        return bundle;
+    }
+
+    private Intent getIntentFromUrl(String path, int rawId, boolean isInternalStorage) {
+        Intent intent = new Intent(context, FolioActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        Bundle bundle = getPreparedArguments(path, rawId, isInternalStorage);
+        intent.putExtras(bundle);
+        return intent;
+    }
+
+    public FolioFragment createFragmentForBook(String path, int rawId, boolean isInternalStorage) {
+        FolioFragment fragment = new FolioFragment();
+        Bundle bundle = getPreparedArguments(path, rawId, isInternalStorage);
+        fragment.setArguments(bundle);
         return fragment;
     }
 

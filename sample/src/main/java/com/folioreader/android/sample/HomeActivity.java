@@ -17,7 +17,6 @@ package com.folioreader.android.sample;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -28,13 +27,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.folioreader.Config;
-import com.folioreader.Constants;
 import com.folioreader.FolioReader;
 import com.folioreader.model.HighLight;
 import com.folioreader.model.locators.ReadLocator;
-import com.folioreader.ui.activity.FolioActivity;
 import com.folioreader.ui.base.OnSaveHighlight;
-import com.folioreader.ui.fragment.FolioFragment;
 import com.folioreader.util.AppUtil;
 import com.folioreader.util.OnHighlightListener;
 import com.folioreader.util.ReadLocatorListener;
@@ -55,8 +51,6 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         setContentView(R.layout.activity_home);
 
         folioReader = FolioReader.get()
@@ -69,7 +63,6 @@ public class HomeActivity extends AppCompatActivity
         findViewById(R.id.btn_raw).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Config config = AppUtil.getSavedConfig(getApplicationContext());
                 if (config == null)
                     config = new Config();
@@ -83,22 +76,23 @@ public class HomeActivity extends AppCompatActivity
         findViewById(R.id.btn_assest).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ReadLocator readLocator = getLastReadLocator();
+                Config config = AppUtil.getSavedConfig(getApplicationContext());
+                if (config == null)
+                    config = new Config();
+                config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
 
-//                ReadLocator readLocator = getLastReadLocator();
-//
-//                Config config = AppUtil.getSavedConfig(getApplicationContext());
-//                if (config == null)
-//                    config = new Config();
-//                config.setAllowedDirection(Config.AllowedDirection.VERTICAL_AND_HORIZONTAL);
-//
-//                folioReader.setReadLocator(readLocator);
-//                folioReader.setConfig(config, true)
-//                        .openBook("file:///android_asset/TheSilverChair.epub");
+                folioReader.setReadLocator(readLocator);
+                folioReader.setConfig(config, true)
+                        .openBook("file:///android_asset/TheSilverChair.epub");
+            }
+        });
 
-
-                Intent intent = new Intent(HomeActivity.this, FolioCustomActivity.class);
+        findViewById(R.id.btn_fragment).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(HomeActivity.this, FolioActivityForFragment.class);
                 startActivity(intent);
-
             }
         });
     }

@@ -1,19 +1,18 @@
 package com.folioreader.ui.fragment
 
-import android.Manifest
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import android.util.DisplayMetrics
 import android.util.Log
@@ -21,7 +20,6 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -66,7 +64,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
 
     private var mFolioPageViewPager: DirectionalViewpager? = null
 
-    //    private var actionBar: ActionBar? = null
     private var appBarLayout: FolioAppBarLayout? = null
     private var toolbar: Toolbar? = null
     private var distractionFreeMode: Boolean = false
@@ -85,6 +82,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
 
     private var mBookId: String? = null
     private var mEpubFilePath: String? = null
+    private var mIsInternalStorage: Boolean? = null
     private var mEpubSourceType: FolioActivity.EpubSourceType? = null
     private var mEpubRawId = 0
     private var mediaControllerFragment: MediaControllerFragment? = null
@@ -105,11 +103,8 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
     companion object {
 
         @JvmField
-        val LOG_TAG: String = FolioActivity::class.java.simpleName
+        val LOG_TAG: String = FolioFragment::class.java.simpleName
 
-        const val INTENT_EPUB_SOURCE_PATH = "com.folioreader.epub_asset_path"
-        const val INTENT_EPUB_SOURCE_TYPE = "epub_source_type"
-        const val EXTRA_READ_LOCATOR = "com.folioreader.extra.READ_LOCATOR"
         private const val BUNDLE_READ_LOCATOR_CONFIG_CHANGE = "BUNDLE_READ_LOCATOR_CONFIG_CHANGE"
         private const val BUNDLE_DISTRACTION_FREE_MODE = "BUNDLE_DISTRACTION_FREE_MODE"
         const val EXTRA_SEARCH_ITEM = "EXTRA_SEARCH_ITEM"
@@ -132,11 +127,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
                 } catch (e: Exception) {
                     Log.e(LOG_TAG, "-> ", e)
                 }
-
-//                val closeIntent = Intent(context, FolioActivity::class.java)
-//                closeIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-//                closeIntent.action = FolioReader.ACTION_CLOSE_FOLIOREADER
-//                activity?.fi
             }
         }
     }
@@ -169,13 +159,14 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
             null
         }
 
-    private enum class RequestCode private constructor(internal val value: Int) {
+    private enum class RequestCode(internal val value: Int) {
         CONTENT_HIGHLIGHT(77),
         SEARCH(101)
     }
 
 
-//  todo:  Как мигрировать в фрагм
+//  todo:  Need migration for fragment
+//
 //    override fun onNewIntent(intent: Intent) {
 //        super.onNewIntent(intent)
 //        setIntent(intent)
@@ -209,6 +200,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         Log.v(LOG_TAG, "-> onResume")
         topActivity = true
 
+//  todo:  Need migration for fragment
 //        val action = intent.action
 //        if (action != null && action == FolioReader.ACTION_CLOSE_FOLIOREADER) {
 //            // FolioActivity is topActivity, so need to broadcast ReadLocator.
@@ -228,7 +220,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         // Need to add when vector drawables support library is used.
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
 
-        handler = Handler()
+        handler = Handler(Looper.getMainLooper())
         val display = (activity as AppCompatActivity).windowManager.defaultDisplay
         displayMetrics = resources.displayMetrics
         display.getRealMetrics(displayMetrics)
@@ -247,7 +239,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         setConfig(savedInstanceState)
         initDistractionFreeMode(savedInstanceState)
 
-
         this.savedInstanceState = savedInstanceState
 
         if (savedInstanceState != null) {
@@ -256,31 +247,29 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
                 savedInstanceState.getCharSequence(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY)
         }
 
-        mBookId = arguments?.getString(FolioReader.EXTRA_BOOK_ID)
-        mEpubSourceType =
-            arguments?.getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE) as FolioActivity.EpubSourceType
-        if (mEpubSourceType == FolioActivity.EpubSourceType.RAW) {
-            mEpubRawId = arguments?.getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH)!!
-        } else {
-            mEpubFilePath = arguments?.getString(FolioActivity.INTENT_EPUB_SOURCE_PATH)
-        }
+        getIntentExtrasAndAssignFields()
 
         initActionBar()
         initMediaController()
 
-        if (ContextCompat.checkSelfPermission(
-                requireActivity(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                requireActivity(),
-                Constants.getWriteExternalStoragePerms(),
-                Constants.WRITE_EXTERNAL_STORAGE_REQUEST
-            )
+        setupBook()
+    }
+
+    private fun getIntentExtrasAndAssignFields() {
+        mBookId = arguments?.getString(FolioReader.EXTRA_BOOK_ID)
+        mEpubSourceType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            arguments?.getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE, FolioActivity.EpubSourceType::class.java)
         } else {
-            setupBook()
+            arguments?.getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE) as FolioActivity.EpubSourceType
         }
+
+        if (mEpubSourceType == FolioActivity.EpubSourceType.RAW) {
+            mEpubRawId = arguments?.getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH, 0) ?: 0
+        } else {
+            mEpubFilePath = arguments?.getString(FolioActivity.INTENT_EPUB_SOURCE_PATH)
+        }
+
+        mIsInternalStorage = arguments?.getBoolean(FolioActivity.INTENT_EPUB_SOURCE_STORAGE_TYPE, true)
     }
 
     override fun onCreateView(
@@ -298,6 +287,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         createOptionsMenu()
         val config = AppUtil.getSavedConfig((activity as AppCompatActivity).applicationContext)!!
 
+// todo: need migration to fragment
 //        val drawable = ContextCompat.getDrawable(context!!, R.drawable.ic_drawer)
 //        UiUtil.setColorIntToDrawable(config.themeColor, drawable!!)
 //        toolbar!!.navigationIcon = drawable
@@ -362,7 +352,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         )
     }
 
-    fun createOptionsMenu() {
+    private fun createOptionsMenu() {
 
         toolbar?.inflateMenu(R.menu.menu_main_fragment)
 
@@ -386,12 +376,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
 
         toolbar?.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener { item ->
             val itemId = item.itemId
-
-//            if (itemId == android.R.id.home) {
-//                Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
-//                startContentHighlightActivity()
-//                true
-
             if (itemId == R.id.itemDrawer) {
                 Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer")
                 startContentHighlightActivity()
@@ -420,7 +404,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         })
     }
 
-    fun startContentHighlightActivity() {
+    private fun startContentHighlightActivity() {
 
         val intent = Intent(requireActivity(), ContentHighlightActivity::class.java)
 
@@ -445,14 +429,14 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         )
     }
 
-    fun showConfigBottomSheetDialogFragment() {
+    private fun showConfigBottomSheetDialogFragment() {
         ConfigBottomSheetDialogFragment().show(
             childFragmentManager,
             ConfigBottomSheetDialogFragment.LOG_TAG
         )
     }
 
-    fun showMediaController() {
+    private fun showMediaController() {
         mediaControllerFragment!!.show(childFragmentManager)
     }
 
@@ -502,7 +486,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         }
 
         portNumber =
-            arguments!!.getInt(FolioReader.EXTRA_PORT_NUMBER, Constants.DEFAULT_PORT_NUMBER)
+            arguments?.getInt(FolioReader.EXTRA_PORT_NUMBER, Constants.DEFAULT_PORT_NUMBER) ?: Constants.DEFAULT_PORT_NUMBER
         portNumber = AppUtil.getAvailablePortNumber(portNumber)
 
         r2StreamerServer = Server(portNumber)
@@ -576,8 +560,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
 
         direction = newDirection
 
-        this.childFragmentManager
-
         mFolioPageViewPager!!.setDirection(newDirection)
         mFolioPageFragmentAdapter = FolioPageFragmentAdapter(
             childFragmentManager,
@@ -606,14 +588,15 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         )
     }
 
-    fun onPostCreate(savedInstanceState: Bundle?) {
+//todo: need migration for fragment
+//    override fun onPostCreate(savedInstanceState: Bundle?) {
 //        super.onPostCreate(savedInstanceState)
-        Log.v(LOG_TAG, "-> onPostCreate")
-
-        if (distractionFreeMode) {
-            handler!!.post { hideSystemUI() }
-        }
-    }
+//        Log.v(FolioActivity.LOG_TAG, "-> onPostCreate")
+//
+//        if (distractionFreeMode) {
+//            handler!!.post { hideSystemUI() }
+//        }
+//    }
 
 
     /**
@@ -732,14 +715,12 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
     }
 
     override fun onSystemUiVisibilityChange(visibility: Int) {
+        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
 
-//        todo Скрывать статус бар
-//        Log.v(LOG_TAG, "-> onSystemUiVisibilityChange -> visibility = $visibility")
-//
-//        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
-//        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
+        distractionFreeMode = visibility != View.SYSTEM_UI_FLAG_VISIBLE
+        Log.v(LOG_TAG, "-> distractionFreeMode = $distractionFreeMode")
 
-//        todo Скрывать тул бар
+//        todo need migration for fragment
 //        if (toolbar != null) {
 //            if (distractionFreeMode) {
 //                toolbar!!.visibility = View.GONE
@@ -750,12 +731,12 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
     }
 
     override fun toggleSystemUI() {
-
-        if (distractionFreeMode) {
+//todo: need migration for fragment
+//        if (distractionFreeMode) {
 //            showSystemUI()
-        } else {
+//        } else {
 //            hideSystemUI()
-        }
+//        }
     }
 
     private fun showSystemUI() {
@@ -859,14 +840,17 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
             val type = data.getStringExtra(Constants.TYPE)
 
             if (type == Constants.CHAPTER_SELECTED) {
-                goToChapter(data.getStringExtra(Constants.SELECTED_CHAPTER_POSITION))
-
+                data.getStringExtra(Constants.SELECTED_CHAPTER_POSITION)?.let { goToChapter(it) }
             } else if (type == Constants.HIGHLIGHT_SELECTED) {
                 val highlightImpl = data.getParcelableExtra<HighlightImpl>(HIGHLIGHT_ITEM)
-                currentChapterIndex = highlightImpl.pageNumber
+                if (highlightImpl != null) {
+                    currentChapterIndex = highlightImpl.pageNumber
+                }
                 mFolioPageViewPager!!.currentItem = currentChapterIndex
                 val folioPageFragment = currentFragment ?: return
-                folioPageFragment.scrollToHighlightId(highlightImpl.rangy)
+                if (highlightImpl != null) {
+                    folioPageFragment.scrollToHighlightId(highlightImpl.rangy)
+                }
             }
         }
     }
@@ -1077,20 +1061,6 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
                 spine!![currentChapterIndex].href, false, false
             )
         )
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            Constants.WRITE_EXTERNAL_STORAGE_REQUEST -> if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                setupBook()
-            } else {
-                (activity as AppCompatActivity).finish()
-            }
-        }
     }
 
     override fun getDirection(): Config.Direction {
