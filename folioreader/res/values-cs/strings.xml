@@ -59,6 +59,7 @@
 
     <string name="menu_item_search">Vyhledávání</string>
     <string name="menu_item_config">Nastavení</string>
+    <string name="menu_item_content">Content</string>
     <string name="menu_item_tts">Převod textu na řeč</string>
 
     <string name="search_hint">Vyhledávání v knize</string>

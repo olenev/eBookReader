@@ -37,24 +37,6 @@ public class FolioPageFragmentAdapter extends FragmentStatePagerAdapter {
         fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
     }
 
-
-//    public FolioPageFragmentAdapter(FragmentManager fragmentManager, List<Link> spineReferences,
-//                                    String epubFileName, String bookId, boolean isChildFragment) {
-//
-//        this.mSpineReferences = spineReferences;
-//        this.mEpubFileName = epubFileName;
-//        this.mBookId = bookId;
-//
-//        FragmentTransaction ft = fragmentManager.beginTransaction();
-//
-//        fragmentManager.beginTransaction();
-//        fragments = new ArrayList<>(Arrays.asList(new Fragment[mSpineReferences.size()]));
-//        ft.commit();
-//    }
-
-
-
-
     @Override
     public void destroyItem(ViewGroup container, int position, Object object) {
         super.destroyItem(container, position, object);

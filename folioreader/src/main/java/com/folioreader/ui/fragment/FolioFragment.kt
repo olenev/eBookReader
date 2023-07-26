@@ -371,8 +371,9 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         )
         UiUtil.setColorIntToDrawable(config.themeColor, toolbar?.menu?.findItem(R.id.itemTts)?.icon)
 
-        if (!config.isShowTts)
+        if (!config.isShowTts) {
             toolbar?.menu?.findItem(R.id.itemTts)?.isVisible = false
+        }
 
         toolbar?.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener { item ->
             val itemId = item.itemId

@@ -16,7 +16,7 @@ class FolioActivityForFragment : AppCompatActivity() {
         val config = Config()
             .setThemeColorRes(R.color.grey_color)
             .setNightMode(false)
-            .setShowTts(true)
+            .setShowTts(false)
 
         folioReader.setConfig(config, true)
 
