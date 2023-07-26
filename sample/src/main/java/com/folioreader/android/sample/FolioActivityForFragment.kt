@@ -22,6 +22,7 @@ class FolioActivityForFragment : AppCompatActivity() {
 
         val fragment: FolioFragment =
             folioReader.createFragmentForBook("file:///android_asset/TheSilverChair.epub", 0, true)
+//            folioReader.createFragmentForBook("file:///android_asset/Postural.epub", 0, true)
 
         supportFragmentManager.beginTransaction()
             .add(R.id.container, fragment)
