@@ -45,6 +45,7 @@ import com.folioreader.ui.view.FolioAppBarLayout
 import com.folioreader.ui.view.MediaControllerCallback
 import com.folioreader.util.AppUtil
 import com.folioreader.util.FileUtil
+import com.folioreader.util.SearchTransfer
 import com.folioreader.util.UiUtil
 import org.greenrobot.eventbus.EventBus
 import org.readium.r2.shared.Link
@@ -242,7 +243,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         this.savedInstanceState = savedInstanceState
 
         if (savedInstanceState != null) {
-            searchAdapterDataBundle = savedInstanceState.getBundle(SearchAdapter.DATA_BUNDLE)
+            searchAdapterDataBundle = SearchTransfer.dataBundle
             searchQuery =
                 savedInstanceState.getCharSequence(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY)
         }
@@ -388,7 +389,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
                 val intent = Intent(context, SearchActivity::class.java)
                 intent.putExtra(SearchActivity.BUNDLE_SPINE_SIZE, spine?.size ?: 0)
                 intent.putExtra(SearchActivity.BUNDLE_SEARCH_URI, searchUri)
-                intent.putExtra(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
+                SearchTransfer.dataBundle = searchAdapterDataBundle
                 intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
                 startActivityForResult(intent, RequestCode.SEARCH.value)
                 true
@@ -818,12 +819,12 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
             if (resultCode == Activity.RESULT_CANCELED)
                 return
 
-            searchAdapterDataBundle = data!!.getBundleExtra(SearchAdapter.DATA_BUNDLE)
-            searchQuery = data.getCharSequenceExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY)
+            searchAdapterDataBundle = SearchTransfer.dataBundle
+            searchQuery = data?.getCharSequenceExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY)
 
             if (resultCode == SearchActivity.ResultCode.ITEM_SELECTED.value) {
 
-                searchLocator = data.getParcelableExtra(EXTRA_SEARCH_ITEM)
+                searchLocator = data?.getParcelableExtra(EXTRA_SEARCH_ITEM)
                 // In case if SearchActivity is recreated due to screen rotation then FolioActivity
                 // will also be recreated, so mFolioPageViewPager might be null.
                 if (mFolioPageViewPager == null) return
@@ -873,6 +874,10 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
             localBroadcastManager.sendBroadcast(Intent(FolioReader.ACTION_FOLIOREADER_CLOSED))
             FolioReader.get().retrofit = null
             FolioReader.get().r2StreamerApi = null
+        }
+
+        if (activity?.isChangingConfigurations != true) {
+            SearchTransfer.dataBundle = null
         }
     }
 
@@ -1005,7 +1010,7 @@ class FolioFragment : Fragment(), FolioActivityCallback, MediaControllerCallback
         this.outState = outState
 
         outState.putBoolean(BUNDLE_DISTRACTION_FREE_MODE, distractionFreeMode)
-        outState.putBundle(SearchAdapter.DATA_BUNDLE, searchAdapterDataBundle)
+        SearchTransfer.dataBundle = searchAdapterDataBundle
         outState.putCharSequence(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery)
     }
 

@@ -382,9 +382,9 @@ class FolioPageFragment : Fragment(),
 
         mWebview!!.addJavascriptInterface(this, "Highlight")
         mWebview!!.addJavascriptInterface(this, "FolioPageFragment")
-        mWebview!!.addJavascriptInterface(webViewPager, "WebViewPager")
-        mWebview!!.addJavascriptInterface(loadingView, "LoadingView")
-        mWebview!!.addJavascriptInterface(mWebview, "FolioWebView")
+        webViewPager?.let { mWebview?.addJavascriptInterface(it, "WebViewPager") }
+        loadingView?.let { mWebview?.addJavascriptInterface(it, "LoadingView") }
+        mWebview?.let { mWebview?.addJavascriptInterface(it, "FolioWebView") }
 
         mWebview!!.setScrollListener(object : FolioWebView.ScrollListener {
             override fun onScrollChange(percent: Int) {

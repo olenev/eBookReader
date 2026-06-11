@@ -9,6 +9,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentTransaction;
 import com.folioreader.Config;
 import com.folioreader.Constants;
@@ -30,6 +33,7 @@ public class ContentHighlightActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_content_highlight);
+        applyWindowInsets();
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
@@ -39,6 +43,16 @@ public class ContentHighlightActivity extends AppCompatActivity {
         mConfig = AppUtil.getSavedConfig(this);
         mIsNightMode = mConfig != null && mConfig.isNightMode();
         initViews();
+    }
+
+    private void applyWindowInsets() {
+        final View root = findViewById(R.id.content_highlight_root);
+        ViewCompat.setOnApplyWindowInsetsListener(root, (v, windowInsets) -> {
+            Insets bars = windowInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return windowInsets;
+        });
     }
 
     private void initViews() {

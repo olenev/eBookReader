@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.AppBarLayout
 
 class FolioAppBarLayout : AppBarLayout {
@@ -17,25 +18,22 @@ class FolioAppBarLayout : AppBarLayout {
     var navigationBarHeight: Int = 0
     var insets: Rect? = null
 
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
 
-        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(this) { _, windowInsets ->
             Log.v(LOG_TAG, "-> onApplyWindowInsets")
-            // For API level 20 and above
 
-            this.insets = Rect(
-                insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
-                insets.systemWindowInsetRight, insets.systemWindowInsetBottom
+            val bars = windowInsets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
             )
 
-            navigationBarHeight = insets.systemWindowInsetBottom
+            this.insets = Rect(bars.left, bars.top, bars.right, bars.bottom)
 
-            setMargins(
-                insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
-                insets.systemWindowInsetRight
-            )
-            insets
+            navigationBarHeight = bars.bottom
+
+            setMargins(bars.left, bars.top, bars.right)
+            windowInsets
         }
     }
 

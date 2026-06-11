@@ -9,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.SeekBar
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.folioreader.Config
@@ -24,7 +26,6 @@ import com.folioreader.util.UiUtil
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.view_config.*
 import org.greenrobot.eventbus.EventBus
 
 /**
@@ -42,12 +43,40 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     private var isNightMode = false
     private lateinit var activityCallback: FolioActivityCallback
 
+    private lateinit var container: View
+    private lateinit var view_config_ib_day_mode: ImageButton
+    private lateinit var view_config_ib_night_mode: ImageButton
+    private lateinit var view_config_font_andada: TextView
+    private lateinit var view_config_font_lato: TextView
+    private lateinit var view_config_font_lora: TextView
+    private lateinit var view_config_font_raleway: TextView
+    private lateinit var view5: View
+    private lateinit var buttonVertical: TextView
+    private lateinit var buttonHorizontal: TextView
+    private lateinit var view_config_font_size_seek_bar: SeekBar
+
+    private fun bindViews(view: View) {
+        container = view.findViewById(R.id.container)
+        view_config_ib_day_mode = view.findViewById(R.id.view_config_ib_day_mode)
+        view_config_ib_night_mode = view.findViewById(R.id.view_config_ib_night_mode)
+        view_config_font_andada = view.findViewById(R.id.view_config_font_andada)
+        view_config_font_lato = view.findViewById(R.id.view_config_font_lato)
+        view_config_font_lora = view.findViewById(R.id.view_config_font_lora)
+        view_config_font_raleway = view.findViewById(R.id.view_config_font_raleway)
+        view5 = view.findViewById(R.id.view5)
+        buttonVertical = view.findViewById(R.id.buttonVertical)
+        buttonHorizontal = view.findViewById(R.id.buttonHorizontal)
+        view_config_font_size_seek_bar = view.findViewById(R.id.view_config_font_size_seek_bar)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.view_config, container)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bindViews(view)
 
         if (activity is FolioActivity)
             activityCallback = activity as FolioActivityCallback

@@ -78,6 +78,9 @@ public class HighlightAdapter extends RecyclerView.Adapter<HighlightAdapter.High
         holder.editNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (holder.itemView instanceof com.folioreader.ui.view.SwipeRevealLayout) {
+                    ((com.folioreader.ui.view.SwipeRevealLayout) holder.itemView).close(true);
+                }
                 callback.editNote(getItem(position), position);
             }
         });

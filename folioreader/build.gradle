@@ -1,13 +1,9 @@
 apply plugin: 'com.android.library'
 apply from: '../config/quality/quality.gradle'
-apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'maven-publish'
 
 ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'folioreader'
-
     publishedGroupId = 'com.folioreader'
     libraryName = 'FolioReader'
     artifact = 'folioreader'
@@ -29,16 +25,25 @@ ext {
 }
 
 android {
+    namespace 'com.folioreader'
     useLibrary 'org.apache.http.legacy'
     compileSdkVersion versions.androidCompileSdk
 
     defaultConfig {
         minSdkVersion versions.androidMinSdk
-        compileSdkVersion versions.androidCompileSdk
         targetSdkVersion versions.androidTargetSdk
         versionCode versions.projectVersionCode
         versionName versions.projectVersionName
         vectorDrawables.useSupportLibrary = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
     }
 
     sourceSets {
@@ -53,31 +58,49 @@ android {
     }
 
     packagingOptions {
-        exclude 'META-INF/ASL2.0'
-        exclude 'META-INF/DEPENDENCIES.txt'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/dependencies.txt'
-        exclude 'META-INF/LGPL2.1'
-        exclude 'META-INF/services/javax.annotation.processing.Processor'
+        resources {
+            excludes += [
+                    'META-INF/ASL2.0',
+                    'META-INF/DEPENDENCIES.txt',
+                    'META-INF/LICENSE.txt',
+                    'META-INF/NOTICE.txt',
+                    'META-INF/NOTICE',
+                    'META-INF/LICENSE',
+                    'META-INF/DEPENDENCIES',
+                    'META-INF/notice.txt',
+                    'META-INF/license.txt',
+                    'META-INF/dependencies.txt',
+                    'META-INF/LGPL2.1',
+                    'META-INF/services/javax.annotation.processing.Processor'
+            ]
+        }
     }
 
-    lintOptions {
+    lint {
         abortOnError false
         lintConfig file("lint.xml")
     }
 
-    checkstyle {
-        ignoreFailures = true
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
     }
 }
 
-apply from: '../folioreader/bintray/installv1.gradle'
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                from components.release
+                groupId publishedGroupId
+                artifactId artifact
+                version libraryVersion
+            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -88,7 +111,6 @@ dependencies {
     testImplementation 'junit:junit:4.12'
 
     implementation 'org.slf4j:slf4j-android:1.7.25'
-    implementation 'com.daimajia.swipelayout:library:1.2.0@aar'
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$versions.kotlin"
@@ -107,11 +129,13 @@ dependencies {
 
     // R2 modules
     api("com.github.codetoart:r2-shared-kotlin:$versions.r2SharedKotlin") {
+        exclude group: 'com.android.support'
         exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
         exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
         changing = true
     }
     api("com.github.codetoart:r2-streamer-kotlin:$versions.r2StreamerKotlin") {
+        exclude group: 'com.android.support'
         exclude group: "org.slf4j", module: "slf4j-api"
         exclude group: 'com.github.kittinunf.fuel', module: 'fuel'
         exclude group: 'com.github.kittinunf.fuel', module: 'fuel-android'
@@ -122,6 +146,7 @@ dependencies {
     implementation 'org.springframework:spring-core:4.3.19.RELEASE'
 
     // Lifecycle
-    implementation "androidx.lifecycle:lifecycle-extensions:$versions.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$versions.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$versions.lifecycle"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$versions.lifecycle"
 }
-apply from: '../folioreader/bintray/bintrayv1.gradle'
